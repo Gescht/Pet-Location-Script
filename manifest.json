@@ -1,27 +1,23 @@
 {
-  "description": "The script converts item data of the turtle database into the format used by AtlasLoot",
+  "description": "The script converts battle pet location data of the tauri database into the format used by PetTracker Addon",
   "manifest_version": 2,
-  "name": "Atlas-Web-Script",
+  "name": "Battle-Pet-Web-Script",
   "version": "1.0",
   "icons": {
-    "48": "icons/atlas.png"
+    "48": "icons/inv_pet_achievement_captureawildpet.jpg"
   },
   "permissions": [
     "activeTab"
   ],
   "content_scripts": [
     {
-      "matches": ["*://database.turtle-wow.org/*"],
-      "js": ["atlas-script.js"]
-    },
-    {
-      "matches": ["*://wowgaming.altervista.org/aowow/*"],
-      "js": ["location-script.js"]
+      "matches": ["*://mop-shoot.tauri.hu/?npc=*"],
+      "js": ["battle-pet.js"]
     }
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "atlaslootscript@gescht"
+      "id": "battlepetlocationscript@gescht"
     }
   }
 }
