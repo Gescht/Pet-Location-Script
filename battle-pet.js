@@ -2794,7 +2794,7 @@ function getPetName(){
     return document.getElementById("main-contents").getElementsByTagName('h1')[0].innerText;
 }
 function getPetId(){
-    return document.URL.match("(\\d+)")[0];
+    return battlePetData[document.URL.match("(\\d+)")[0]].[0];
 }
 function getZoneName(){
     return worldMapAreaID[document.getElementById("locations").getElementsByClassName(' selected')[0].innerText.replace(/ /g,"")];
@@ -2817,8 +2817,9 @@ function getBattlePetLocations(){
     }
     return data
 }
-//create the final npc info string
-function createNpcString() {
+//todo
+//create the final battle pet location info string
+function createPetString() {
     let npcInfo = "\t\t\t[\""              + npcName         + "\"] = {";
     npcInfo = npcInfo + "id="              + npcId           + ",";
     npcInfo = npcInfo + "level="           + npcLevel        + ",";
