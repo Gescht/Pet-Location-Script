@@ -4,18 +4,279 @@
 */
 
 /* variables */
-/*/final npc string info (for final addon usage)
-var npcString       = null;
+//final pet string info (for final addon usage)
+var npcString        = null;
 //npc data
-var npcMap          = null;
-var npcName         = null;
-var npcId           = null;
-var npcLevel        = null;
-var npcCreatureType = null;
-var npcElite        = null;
-var npcLocations    = null;
-*/
+//var npcMap          = null;
+//var npcName         = null;
+var petId             = null;
+var zoneId            = null;
+var petLocationString = null;
+//var npcLevel        = null;
+//var npcCreatureType = null;
+//var npcElite        = null;
+//var npcLocations    = null;
+
 const worldMapAreaID = {
+	Durotar:4,
+	Mulgore:9,
+	NorthernBarrens:11,
+	Kalimdor:13,
+	EasternKingdoms:14,
+	ArathiHighlands:16,
+	Badlands:17,
+	BlastedLands:19,
+	TirisfalGlades:20,
+	SilverpineForest:21,
+	WesternPlaguelands:22,
+	EasternPlaguelands:23,
+	HillsbradFoothills:24,
+	TheHinterlands:26,
+	DunMorogh:27,
+	SearingGorge:28,
+	BurningSteppes:29,
+	ElwynnForest:30,
+	DeadwindPass:32,
+	Duskwood:34,
+	LochModan:35,
+	RedridgeMountains:36,
+	NorthernStranglethorn:37,
+	SwampofSorrows:38,
+	Westfall:39,
+	Wetlands:40,
+	Teldrassil:41,
+	Darkshore:42,
+	Ashenvale:43,
+	ThousandNeedles:61,
+	StonetalonMountains:81,
+	Desolace:101,
+	Feralas:121,
+	DustwallowMarsh:141,
+	Tanaris:161,
+	Azshara:181,
+	Felwood:182,
+	UnGoroCrater:201,
+	Moonglade:241,
+	Silithus:261,
+	Winterspring:281,
+	StormwindCity:301,
+	Orgrimmar:321,
+	Ironforge:341,
+	ThunderBluff:362,
+	Darnassus:381,
+	Undercity:382,
+	AlteracValley:401,
+	WarsongGulch:443,
+	ArathiBasin:461,
+	EversongWoods:462,
+	Ghostlands:463,
+	AzuremystIsle:464,
+	HellfirePeninsula:465,
+	Outland:466,
+	Zangarmarsh:467,
+	TheExodar:471,
+	ShadowmoonValley:473,
+	BladesEdgeMountains:475,
+	BloodmystIsle:476,
+	Nagrand:477,
+	TerokkarForest:478,
+	Netherstorm:479,
+	SilvermoonCity:480,
+	ShattrathCity:481,
+	EyeoftheStorm:482,
+	Northrend:485,
+	BoreanTundra:486,
+	Dragonblight:488,
+	GrizzlyHills:490,
+	HowlingFjord:491,
+	Icecrown:492,
+	SholazarBasin:493,
+	TheStormPeaks:495,
+	ZulDrak:496,
+	IsleofQuelDanas:499,
+	Wintergrasp:501,
+	TheScarletEnclave:502,
+	Dalaran:504,
+	CrystalsongForest:510,
+	StrandoftheAncients:512,
+	TheNexus:520,
+	TheCullingofStratholme:521,
+	Ahnkahet:TheOldKingdom:522,
+	UtgardeKeep:523,
+	UtgardePinnacle:524,
+	HallsofLightning:525,
+	HallsofStone:526,
+	TheEyeofEternity:527,
+	TheOculus:528,
+	Ulduar:529,
+	Gundrak:530,
+	TheObsidianSanctum:531,
+	VaultofArchavon:532,
+	Azjol-Nerub:533,
+	DrakTharonKeep:534,
+	Naxxramas:535,
+	TheVioletHold:536,
+	IsleofConquest:540,
+	HrothgarsLanding:541,
+	TrialoftheChampion:542,
+	TrialoftheCrusader:543,
+	TheLostIsles:544,
+	Gilneas:545,
+	TheForgeofSouls:601,
+	PitofSaron:602,
+	HallsofReflection:603,
+	IcecrownCitadel:604,
+	Kezan:605,
+	MountHyjal:606,
+	SouthernBarrens:607,
+	TheRubySanctum:609,
+	KelptharForest:610,
+	GilneasCity:611,
+	Vashjir:613,
+	AbyssalDepths:614,
+	ShimmeringExpanse:615,
+	TwinPeaks:626,
+	Deepholm:640,
+	TheCapeofStranglethorn:673,
+	RagefireChasm:680,
+	RuinsofGilneas:684,
+	RuinsofGilneasCity:685,
+	ZulFarrak:686,
+	TheTempleofAtalHakkar:687,
+	BlackfathomDeeps:688,
+	StranglethornVale:689,
+	TheStockade:690,
+	Gnomeregan:691,
+	Uldaman:692,
+	MoltenCore:696,
+	DireMaul:699,
+	TwilightHighlands:700,
+	BlackrockDepths:704,
+	TolBarad:708,
+	TolBaradPeninsula:709,
+	TheShatteredHalls:710,
+	RuinsofAhnQiraj:717,
+	OnyxiasLair:718,
+	Uldum:720,
+	BlackrockSpire:721,
+	AuchenaiCrypts:722,
+	SethekkHalls:723,
+	ShadowLabyrinth:724,
+	TheBloodFurnace:725,
+	TheUnderbog:726,
+	TheSteamvault:727,
+	TheSlavePens:728,
+	TheBotanica:729,
+	TheMechanar:730,
+	TheArcatraz:731,
+	Mana-Tombs:732,
+	TheBlackMorass:733,
+	OldHillsbradFoothills:734,
+	TheBattleforGilneas:736,
+	TheMaelstrom:737,
+	LostCityoftheTolvir:747,
+	WailingCaverns:749,
+	Maraudon:750,
+	TheMaelstrom:751,
+	BaradinHold:752,
+	BlackrockCaverns:753,
+	BlackwingDescent:754,
+	BlackwingLair:755,
+	TheDeadmines:756,
+	GrimBatol:757,
+	TheBastionofTwilight:758,
+	HallsofOrigination:759,
+	RazorfenDowns:760,
+	RazorfenKraul:761,
+	ShadowfangKeep:764,
+	Stratholme:765,
+	TempleofAhnQiraj:766,
+	ThroneoftheTides:767,
+	TheStonecore:768,
+	TheVortexPinnacle:769,
+	AhnQiraj:TheFallenKingdom:772,
+	ThroneoftheFourWinds:773,
+	HyjalSummit:775,
+	GruulsLair:776,
+	MagtheridonsLair:779,
+	SerpentshrineCavern:780,
+	ZulAman:781,
+	TheEye:782,
+	SunwellPlateau:789,
+	ZulGurub:793,
+	MoltenFront:795,
+	BlackTemple:796,
+	HellfireRamparts:797,
+	MagistersTerrace:798,
+	Karazhan:799,
+	Firelands:800,
+	TheJadeForest:806,
+	ValleyoftheFourWinds:807,
+	TheWanderingIsle:808,
+	Kun-LaiSummit:809,
+	TownlongSteppes:810,
+	ValeofEternalBlossoms:811,
+	WellofEternity:816,
+	HourofTwilight:819,
+	EndTime:820,
+	DragonSoul:824,
+	TheramoresFall(H):851,
+	TempleofKotmogu:856,
+	KrasarangWilds:857,
+	DreadWastes:858,
+	SilvershardMines:860,
+	Pandaria:862,
+	Northshire:864,
+	ColdridgeValley:866,
+	TempleoftheJadeSerpent:867,
+	ScarletHalls:871,
+	TheVeiledStair:873,
+	ScarletMonastery:874,
+	GateoftheSettingSun:875,
+	StormstoutBrewery:876,
+	Shado-panMonastery:877,
+	ABrewingStorm:878,
+	GreenstoneVillage:880,
+	UngaIngoo:882,
+	AssaultonZanvess:883,
+	BrewmoonFestival:884,
+	MoguShanPalace:885,
+	TerraceofEndlessSpring:886,
+	SiegeofNiuzaoTemple:887,
+	Shadowglen:888,
+	ValleyofTrials:889,
+	CampNarache:890,
+	EchoIsles:891,
+	Deathknell:892,
+	SunstriderIsle:893,
+	AmmenVale:894,
+	NewTinkertown:895,
+	MogushanVaults:896,
+	HeartofFear:897,
+	Scholomance:898,
+	ArenaofAnnihilation:899,
+	CryptofForgottenKings:900,
+	ShrineofTwoMoons:903,
+	ShrineofSevenStars:905,
+	TheramoresFall(A):906,
+	LionsLanding(A):911,
+	ALittlePatience:912,
+	DaggerintheDark:914,
+	DominationPoint(H):920,
+	IsleofThunder:928,
+	IsleofGiants:929,
+	ThroneofThunder:930,
+	DeepwindGorge:935,
+	DarkHeartofPandaria:937,
+	TheSecretsofRagefire:938,
+	BloodintheSnow:939,
+	BattleontheHighSeas:940,
+	TimelessIsle:951,
+	SiegeofOrgrimmar:953,
+	CelestialTournament:955,
+	MalornesNightmare:1086,
+	TheRoadtoFel:1099,
+/*
 	4:"Durotar",
 	9:"Mulgore",
 	11:"Northern Barrens",
@@ -274,10 +535,11 @@ const worldMapAreaID = {
 	955:"Celestial Tournament",
 	1086:"Malorne's Nightmare",
 	1099:"The Road to Fel"
+*/
 }
 
 const battlePetData = {
-//  NPCID: [ID,	"Name",	"Source",	"DisplayID"]
+//  NPCID: [PetID,	"Name",	"Source",	"DisplayID"]
 	444: [1352, "Lord Piglet", "Battle", 22938],
 	2671: [39, "Mechanical Squirrel", "Profession", 7937],
 	7380: [44, "Siamese Cat", "Vendor", 5585],
@@ -2788,6 +3050,21 @@ const battlePetData = {
 	208643: [4263, "Tobias", "Drop", 111028],
 	209259: [4265, "Lil' Frostwing", "Achievement", 113829],
 }
+/*
+battlePetLocationData = {
+    [worldMapAreaID] = {
+        [PetID] = {
+            [1] = "JY56"
+            },
+        [PetID] = {
+            [1] = "H4I8"
+            },
+        [PetID] = {
+            [2] = "CECO"
+            }
+    },
+*/
+var battlePetLocationData = {}
 /*  functions */
 //get npc name
 function getPetName(){
@@ -2796,12 +3073,12 @@ function getPetName(){
 function getPetId(){
     return battlePetData[document.URL.match("(\\d+)")[0]].[0];
 }
-function getZoneName(){
-    return worldMapAreaID[document.getElementById("locations").getElementsByClassName(' selected')[0].innerText.replace(/ /g,"")];
+function getZoneID(){
+    return worldMapAreaID[document.getElementById("locations").getElementsByClassName(' selected')[0].innerText.replace(/ |'/g,"")];
 }
-function getBattlePetLocations(){
+function getBattlePetLocationData(){
     let nodes = document.getElementById("mapper-generic").children[0].children[2].children;
-    const data = [];
+    let data = nil;
     for (var i=0, max=nodes.length; i < max; i++) {
         let left = nodes[i].style.left.replace(/\./,"").replace(/%/,"").substring(0,3);
         while (left.length < 3) {
@@ -2813,13 +3090,14 @@ function getBattlePetLocations(){
             top = top + "0"
             top = parseInt(top).toString(36)
         }
-        data[i] = left + top ;
+        data.concat(left,top);
     }
     return data
 }
-//todo
 //create the final battle pet location info string
 function createPetString() {
+    if battlePetData[]
+    //todo
     let npcInfo = "\t\t\t[\""              + npcName         + "\"] = {";
     npcInfo = npcInfo + "id="              + npcId           + ",";
     npcInfo = npcInfo + "level="           + npcLevel        + ",";
@@ -2865,23 +3143,24 @@ function createButton() {
     doc[0].insertBefore(newA,null);
 }
 //all in one call for npc handling
-function queryNpcInfo() {
+function queryBattlePetInfo() {
     //getNpcMap();
-    npcName         = getNpcName();
-    npcId           = getNpcId();
-    npcLevel        = getNpcLevel();
-    npcCreatureType = getNpcCreatureType();
-    npcElite        = getNpcElite();
-    npcLocations    = getNpcLocations();
+    //npcName         = getNpcName();
+    petId             = getPetId();
+    zoneId            = getZoneID();
+    petLocationString = getBattlePetLocationData();
+    //npcLevel        = getNpcLevel();
+    //npcCreatureType = getNpcCreatureType();
+    //npcElite        = getNpcElite();
+    //npcLocations    = getNpcLocations();
 
-    npcString       = createNpcString();
-    document.getElementsByTagName("h2")[0].innerText = "Related"+" "+npcString;
+    battlePetLocationData[zoneId][petId] = petLocationString;
 }
 
 if (window.history) {
     window.addEventListener('hashchange', function(){
-        queryNpcInfo();
+        queryBattlePetInfo();
     });
 }
-queryNpcInfo();
+queryBattlePetInfo();
 createButton();
