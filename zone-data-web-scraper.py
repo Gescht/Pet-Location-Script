@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-from concurrent.futures import ThreadPoolExecutor
+import threading
+import pickle
 
 mapIDData = {
 	"Durotar":4,
@@ -270,13 +271,15 @@ petZones = {}
 
 testMaps = [5695,360,1977,6500,3792,14]
 
+threads = []
+
 #get zone id data
 mapurl = "https://mop-shoot.tauri.hu/?zone="
-for i in range(1,60):
-#for i in testMaps:
-    
+
+def setPetZone(index):
+
 	#build the final zone id url
-	url = mapurl + str(i)
+	url = mapurl + str(index)
 
 	#get webpage data
 	displayText = BeautifulSoup(requests.get(url).text, "html.parser")
@@ -288,7 +291,7 @@ for i in range(1,60):
 
 	#if the zoneid is invalid, skip to next id
 	if displayText == "Error":
-		continue
+		return
     
 	#remove special characters from zone name
 	displayText = displayText.replace(" ", "").replace("'", "").replace(".", "").replace("-", "").replace("(", "").replace(")", "").replace(":", "")
@@ -296,7 +299,16 @@ for i in range(1,60):
 	#check if the zonename has a mapID
 	if displayText in mapIDData:
 		#add zoneID as the key with the value mapID to the dictionary petZones
-		petZones[i] = mapIDData[displayText]
+		petZones[index] = mapIDData[displayText]
 
-""" for zoneID, mapID in petZones.items():
-	print(zoneID," ",mapID) """
+#for i in testMaps:
+for i in range(1,60):
+	t = threading.Thread(target=setPetZone,args=[i,])
+	t.start()
+	threads.append(t)
+
+for thread in threads:
+	thread.join()
+
+with open('petZones.pkl', 'wb') as f:
+    pickle.dump(petZones, f)
