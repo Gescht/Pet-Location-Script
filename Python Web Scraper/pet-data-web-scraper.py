@@ -2526,13 +2526,13 @@ petID = {
 #mapID will be used by the addon
 petZones = {}
 
-petZonesLen = len(petZones)
-
 #load zoneID:mapID dictionary from file
-with open('petZones.pkl', 'rb') as f:
+with open('Python Web Scraper\\petZones.pkl', 'rb') as f:
     loaded_dict = pickle.load(f)
     for zoneID, mapID in loaded_dict.items():
         petZones[zoneID] = mapID
+
+petZonesLen = len(petZones)
 
 #smaller testing dict to ensure the script works
 testPets = {
@@ -2627,5 +2627,5 @@ for thread in threads:
     thread.join()
 
 #write entire pet location data dictionary to file
-with open('petLocationData.pkl', 'wb') as f:
-    pickle.dump(masterPetDataDict, f)
+with open('petLocationData.pkl', 'wb') as df:
+    pickle.dump(masterPetDataDict, df)
