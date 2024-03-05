@@ -2526,13 +2526,15 @@ petID = {
 #mapID will be used by the addon
 petZones = {}
 
+petZonesLen = len(petZones)
+
 #load zoneID:mapID dictionary from file
 with open('petZones.pkl', 'rb') as f:
     loaded_dict = pickle.load(f)
     for zoneID, mapID in loaded_dict.items():
         petZones[zoneID] = mapID
 
-
+#smaller testing dict to ensure the script works
 testPets = {
 	62114: 466,
 	68555: 1129,
@@ -2543,6 +2545,7 @@ testPets = {
 	61751: 448
 	}
 
+#the final dictionary with correct syntax
 masterPetDataDict = {}
 
 threads = []
@@ -2574,52 +2577,55 @@ def getPetLocationData(nID, pID):
     #extracting the pet location data
     for elemnt in soup:
         data = elemnt.text
-        #filter for the script with the location data
+        #check if the script contains location data
         if "g_mapperData" in data:
             #get raw location data
             data = re.findall("({.*?)(?:;)", data)[0]
             #add location data to dict
             petLocation = chompjs.parse_js_object(data)
 
+            #iterate all zones the pet is in
             for zoneID, zoneData in petLocation.items():
+                #get the proper mapID (used in Addon) via zoneID (used on web)
                 mapID = petZones[int(zoneID)]
-
+                #check if the master dictionary already has an entry for the mapID
+                #if it does, we cannot assign an empty sub dictionary to the mapID key
                 if mapID in masterPetDataDict:
                     masterPetDataDict[mapID][pID] = {}
                 else:
                     masterPetDataDict[mapID] = { pID: {}}
+                #iterate all layers of the map/zone the pet is in
                 for layerID, layerData in zoneData.items():
-                    #print("\t\tlayerID: ",layerID)
+                    #init an empty string for all the coordinates data
                     coordinatesData = ""
+                    #iterate all coordinate arrays
                     for coordinateArray in layerData["coords"]:
+                        #coordinates can be a float with up to 3 digits behind the comma
+                        #we require a maximum of 1 digit behind the comma
+                        #after *10 we trunc to remove unneeded info, then convert to int and turn the number into base 36
                         coordinatesData += base_repr(int(coordinateArray[0]*10),36) + base_repr(int(coordinateArray[1]*10),36)
+                    #collected coordinate data gets saved to the specific layerID
                     masterPetDataDict[mapID][pID][layerID] = coordinatesData
+            #counter to visualize progress in command line when executed
             global counterProg
             counterProg += 1
-            print(counterProg," ",nID," ",pID)
+            print(counterProg," / ",petZonesLen,"\t\t",nID,"-",pID)
             #we break because we found the data on the website
             #we are done with this url
             break
 
 
-""" for i in testPets:
-#for i in range(1,7000):
-    t = threading.Thread(target=getPetLocationData,args=[i,])
+#create a thread for each npcID we want to scrape
+for npcId, petId in testPets.items():
+#for npcId, petId in petID.items():
+    t = threading.Thread(target=getPetLocationData,args=[npcId,petId])
     t.start()
     threads.append(t)
 
+#join all threads together
 for thread in threads:
-    thread.join() """
+    thread.join()
 
-
-for npcId, petId in testPets.items():
-#for npcId, petId in petID.items():
-    getPetLocationData(int(npcId), int(petId))
-
-
-""" for mapID, mapData in masterPetDataDict.items():
-    print("\t",mapID)
-    for petID, petData in masterPetDataDict[mapID].items():
-        print("\t\t",petID)
-        for layerID, layerData in masterPetDataDict[mapID][petID].items():
-            print("\t\t\t",layerID," ",masterPetDataDict[mapID][petID][layerID]) """
+#write entire pet location data dictionary to file
+with open('petLocationData.pkl', 'wb') as f:
+    pickle.dump(masterPetDataDict, f)
