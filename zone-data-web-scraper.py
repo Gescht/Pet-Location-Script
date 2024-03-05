@@ -272,7 +272,7 @@ petZones = {}
 testMaps = [5695,360,1977,6500,3792,14]
 
 threads = []
-
+counterProg = 0
 #get zone id data
 mapurl = "https://mop-shoot.tauri.hu/?zone="
 
@@ -300,9 +300,13 @@ def setPetZone(index):
 	if displayText in mapIDData:
 		#add zoneID as the key with the value mapID to the dictionary petZones
 		petZones[index] = mapIDData[displayText]
+	
+	global counterProg
+	counterProg += 1
+	print(counterProg)
 
 #for i in testMaps:
-for i in range(1,60):
+for i in range(1,7000):
 	t = threading.Thread(target=setPetZone,args=[i,])
 	t.start()
 	threads.append(t)
