@@ -4,11 +4,11 @@ import pickle
 import threading
 import re
 import chompjs
+from numpy import base_repr
 
 #npcID: petID
 #npcID is used on the webpage
 #petID will be used by the addon
-
 petID = {
     444: 1352,
     2671: 39,
@@ -2528,13 +2528,20 @@ petZones = {}
 
 #load zoneID:mapID dictionary from file
 with open('petZones.pkl', 'rb') as f:
-	loaded_dict = pickle.load(f)
-	for zoneID, mapID in loaded_dict.items():
-		petZones[zoneID] = mapID
+    loaded_dict = pickle.load(f)
+    for zoneID, mapID in loaded_dict.items():
+        petZones[zoneID] = mapID
 
 
-#testPets = [62114,68555,63550,62115,61367,61369,61751]
-testPets = [62115]
+testPets = {
+	62114: 466,
+	68555: 1129,
+	63550: 724,
+	62115: 467,
+	61367: 418,
+	61369: 420,
+	61751: 448
+	}
 
 masterPetDataDict = {}
 
@@ -2546,76 +2553,73 @@ mapurl = "https://mop-shoot.tauri.hu/?npc="
 
 
 #fetch pet location data
-def getPetLocationData(index):
+def getPetLocationData(nID, pID):
 
-	#build the final npc id url
-	url = mapurl + str(index)
-	#npcID turned into petID
-	thisPetID = petID[index]
-	#get webpage script data
-	soup = BeautifulSoup(requests.get(url).text, "html.parser").find_all("script")
+    #build the final npc id url
+    url = mapurl + str(nID)
+    #get webpage script data
+    soup = BeautifulSoup(requests.get(url).text, "html.parser").find_all("script")
 
     #dict to store individual pet loc data
-	#zoneID:
-	#   layerID:
+    #zoneID:
+    #   layerID:
     #       counts:
-	#       coords:
+    #       coords:
     #           [
     #               [coordinatepair]
-	#               [coordinatepair]
-	#           ]
-	petLocation = {}
-	
-	#extracting the pet location data
-	for elemnt in soup:
-		data = elemnt.text
-		#filter for the script with the location data
-		if "g_mapperData" in data:
-			data = re.findall("({.*?)(?:;)", data)[0]
-			petLocation = chompjs.parse_js_object(data)
-			for zoneID, zoneData in petLocation.items():
-				print("\tmapID: ",petZones[int(zoneID)])
-				for layerID, layerData in zoneData.items():
-					print("\t\tlayerID: ",layerID)
-					coordinatesData = ""
-					for coordinateArray in layerData["coords"]:
-						print("\t\t\tcoordinateArray: ",coordinateArray[0],"\t",coordinateArray[1])
-						
-			for zoneID, zoneData in petLocation.items():				
-				mapID = petZones[int(zoneID)]
-				masterPetDataDict[mapID] = { thisPetID: {}}
-				for layerID, layerData in zoneData.items():
-					print("\t\tlayerID: ",layerID)
-					coordinatesData = "testing"
-					masterPetDataDict[mapID][thisPetID][layerID] = coordinatesData
-			#we break because we found the data on the website
-			#we are done with this url
-			break
-				
+    #               [coordinatepair]
+    #           ]
+    petLocation = {}
 
-	
-	global counterProg
-	counterProg += 1
-	print(counterProg," ",index," ",thisPetID)
+    #extracting the pet location data
+    for elemnt in soup:
+        data = elemnt.text
+        #filter for the script with the location data
+        if "g_mapperData" in data:
+            #get raw location data
+            data = re.findall("({.*?)(?:;)", data)[0]
+            #add location data to dict
+            petLocation = chompjs.parse_js_object(data)
+
+            for zoneID, zoneData in petLocation.items():
+                mapID = petZones[int(zoneID)]
+
+                if mapID in masterPetDataDict:
+                    masterPetDataDict[mapID][pID] = {}
+                else:
+                    masterPetDataDict[mapID] = { pID: {}}
+                for layerID, layerData in zoneData.items():
+                    #print("\t\tlayerID: ",layerID)
+                    coordinatesData = ""
+                    for coordinateArray in layerData["coords"]:
+                        coordinatesData += base_repr(int(coordinateArray[0]*10),36) + base_repr(int(coordinateArray[1]*10),36)
+                    masterPetDataDict[mapID][pID][layerID] = coordinatesData
+            global counterProg
+            counterProg += 1
+            print(counterProg," ",nID," ",pID)
+            #we break because we found the data on the website
+            #we are done with this url
+            break
+
 
 """ for i in testPets:
 #for i in range(1,7000):
-	t = threading.Thread(target=getPetLocationData,args=[i,])
-	t.start()
-	threads.append(t)
+    t = threading.Thread(target=getPetLocationData,args=[i,])
+    t.start()
+    threads.append(t)
 
 for thread in threads:
-	thread.join() """
-	
- 
-#for i in testPets:
-for i in testPets:
-	getPetLocationData(i)
+    thread.join() """
 
 
-for mapID, mapData in masterPetDataDict.items():
+for npcId, petId in testPets.items():
+#for npcId, petId in petID.items():
+    getPetLocationData(int(npcId), int(petId))
+
+
+""" for mapID, mapData in masterPetDataDict.items():
     print("\t",mapID)
     for petID, petData in masterPetDataDict[mapID].items():
         print("\t\t",petID)
         for layerID, layerData in masterPetDataDict[mapID][petID].items():
-            print("\t\t\t",layerID," ",masterPetDataDict[mapID][petID][layerID])
+            print("\t\t\t",layerID," ",masterPetDataDict[mapID][petID][layerID]) """
