@@ -2527,14 +2527,14 @@ petID = {
 petZones = {}
 
 #load zoneID:mapID dictionary from file
-with open('Python Web Scraper\\petZones.pkl', 'rb') as f:
+with open("Python Web Scraper\\petZones.pkl", "rb") as f:
     loaded_dict = pickle.load(f)
     for zoneID, mapID in loaded_dict.items():
         petZones[zoneID] = mapID
 
 petZonesLen = len(petZones)
 
-#smaller testing dict to ensure the script works
+""" #smaller testing dict to ensure the script works
 testPets = {
 	62114: 466,
 	68555: 1129,
@@ -2544,7 +2544,7 @@ testPets = {
 	61369: 420,
 	61751: 448
 	}
-
+ """
 #the final dictionary with correct syntax
 masterPetDataDict = {}
 
@@ -2616,8 +2616,8 @@ def getPetLocationData(nID, pID):
 
 
 #create a thread for each npcID we want to scrape
-for npcId, petId in testPets.items():
-#for npcId, petId in petID.items():
+""" for npcId, petId in testPets.items(): """
+for npcId, petId in petID.items():
     t = threading.Thread(target=getPetLocationData,args=[npcId,petId])
     t.start()
     threads.append(t)
@@ -2627,5 +2627,5 @@ for thread in threads:
     thread.join()
 
 #write entire pet location data dictionary to file
-with open('petLocationData.pkl', 'wb') as df:
+with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:
     pickle.dump(masterPetDataDict, df)
