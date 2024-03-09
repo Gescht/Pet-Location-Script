@@ -6,11 +6,16 @@ import re
 import chompjs
 from numpy import base_repr
 
+useThreads = True
+
 #npcID: petID
 #npcID is used on the webpage
 #petID will be used by the addon
 petID = {
-    444: 1352,
+    7554: 69,
+    22943: 153,
+    7567: 78,    
+    444: 1352,    
     2671: 39,
     7380: 44,
     7381: 45,
@@ -33,13 +38,11 @@ petID = {
     7549: 65,
     7550: 64,
     7553: 68,
-    7554: 69,
     7555: 67,
     7560: 72,
     7561: 74,
     7562: 77,
     7565: 75,
-    7567: 78,
     8376: 83,
     9656: 85,
     9657: 86,
@@ -87,7 +90,6 @@ petID = {
     21064: 143,
     21076: 146,
     22445: 149,
-    22943: 153,
     23198: 155,
     23231: 157,
     23234: 156,
@@ -2545,6 +2547,87 @@ testPets = {
     7381: 45,
     7382: 43,
     7383: 42,
+    7384: 41,
+    7385: 40,
+    7386: 46,
+    7387: 50,
+    7389: 51,
+    7390: 47,
+    7391: 49,
+    7394: 52,
+    7395: 55,
+    7543: 56,
+    7544: 58,
+    7545: 59,
+    7546: 1563,
+    7547: 57,
+    7549: 65,
+    7550: 64,
+    7553: 68,
+    7555: 67,
+    7560: 72,
+    7561: 74,
+    7562: 77,
+    7565: 75,
+    8376: 83,
+    9656: 85,
+    9657: 86,
+    9662: 87,
+    10259: 89,
+    10598: 90,
+    11325: 92,
+    11326: 93,
+    11327: 94,
+    12419: 95,
+    14421: 70,
+    14755: 757,
+    14756: 758,
+    14878: 106,
+    15186: 107,
+    15358: 111,
+    15361: 1168,
+    15429: 114,
+    15698: 119,
+    15699: 116,
+    15705: 120,
+    15706: 118,
+    15710: 117,
+    16069: 121,
+    16085: 122,
+    16445: 1073,
+    16456: 124,
+    16547: 125,
+    16548: 126,
+    16549: 127,
+    16701: 128,
+    17254: 1927,
+    17255: 130,
+    18381: 131,
+    18839: 132,
+    20408: 136,
+    20472: 137,
+    21008: 140,
+    21009: 139,
+    21010: 138,
+    21018: 141,
+    21055: 142,
+    21056: 145,
+    21063: 144,
+    21064: 143,
+    21076: 146,
+    22445: 149,
+    23198: 155,
+    23231: 157,
+    23234: 156,
+    23258: 158,
+    23266: 159,
+    23274: 160,
+    23909: 162,
+    24388: 163,
+    24389: 164,
+    24480: 165,
+    24753: 166,
+    24968: 191,
 	}
 #the final dictionary with correct syntax
 petLocationData = {}
@@ -2674,21 +2757,23 @@ def handlePetData(nID, pID):
         print("pet data missing")
     print("------------------------------------------------------")
 
+if useThreads:
 
-""" #create a thread for each npcID we want to scrape
-for npcId, petId in testPets.items():
-#for npcId, petId in petID.items():
-    t = threading.Thread(target=getPetLocationData,args=[npcId,petId])
-    t.start()
-    threads.append(t)
+    #create a thread for each npcID we want to scrape
+    for npcId, petId in testPets.items():
+    #for npcId, petId in petID.items():
+        t = threading.Thread(target=handlePetData,args=[npcId,petId])
+        t.start()
+        threads.append(t)
 
-#join all threads together
-for thread in threads:
-    thread.join() """
+    #join all threads together
+    for thread in threads:
+        thread.join()
+else:
 
-for npcId, petId in testPets.items():
-#for npcId, petId in petID.items():
-    handlePetData(npcId,petId)
+    for npcId, petId in testPets.items():
+    #for npcId, petId in petID.items():
+        handlePetData(npcId,petId)
 
 #write entire pet location data dictionary to file
 with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:

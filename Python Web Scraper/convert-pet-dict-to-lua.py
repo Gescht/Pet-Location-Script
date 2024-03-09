@@ -7,7 +7,7 @@ masterPetDataDict = {}
 with open("Python Web Scraper\\petLocationData.pkl", "rb") as f:
     masterPetDataDict = pickle.load(f)
 
-with open("Python Web Scraper\\PetAddonData.lua", "a") as the_file:
+with open("Python Web Scraper\\PetAddonData.lua", "w") as the_file:
     the_file.write("{\n")
     for mapID, mapData in masterPetDataDict.items():
         the_file.write("\t["+str(mapID)+"]={\n")
