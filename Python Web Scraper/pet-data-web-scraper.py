@@ -2539,7 +2539,12 @@ testPets = {
     7554: 69,
     22943: 153,
     7567: 78,
-    444: 1352
+    444: 1352,
+    2671: 39,
+    7380: 44,
+    7381: 45,
+    7382: 43,
+    7383: 42,
 	}
 #the final dictionary with correct syntax
 petLocationData = {}
@@ -2548,7 +2553,7 @@ petLocationData = {}
 # { npcId: [petId, itemId] }
 petTaughtByItem = {}
 
-#pets with missing location data
+#pets with missing location data and not taught by item
 petMissingLocation = []
 
 threads = []
@@ -2571,6 +2576,11 @@ def getPetLocationData(soup,pID):
         #check if the script contains location data
         if "g_mapperData" in data:
             
+            #check if there are no coordinates
+            if re.search(r"var g_mapperData = {}",data):
+                print("fail <empty coords>")
+                return False
+            
             #dict to store individual pet loc data
             #zoneID:
             #   layerID:
@@ -2583,7 +2593,7 @@ def getPetLocationData(soup,pID):
             petLocation = {}
 
             #get raw location data
-            data = re.findall("({.*?)(?:;)", data)[0]
+            data = re.findall(r"({.*?)(?:;)", data)[0]
 
             #add location data to dict
             petLocation = chompjs.parse_js_object(data)
@@ -2598,16 +2608,12 @@ def getPetLocationData(soup,pID):
                     petLocationData[mapID][pID] = {}
                 else:
                     petLocationData[mapID] = { pID: {}}
-                print(": ",)
-                print(": ",)
                 #iterate all layers of the map/zone the pet is in
                 for layerID, layerData in zoneData.items():
-                    print(": ",)
                     #init an empty string for all the coordinates data
                     coordinatesData = ""
                     #iterate all coordinate arrays
-                    for coordinateArray in layerData["coords"]:                        
-                        print(": ",)
+                    for coordinateArray in layerData["coords"]:
                         #coordinates can be a float with up to 3 digits behind the comma
                         #we require a maximum of 1 digit behind the comma
                         #after *10 we trunc to remove unneeded info, then convert to int and turn the number into base 36
@@ -2634,7 +2640,7 @@ def getLearnedByItem(soup,pID,nID):
         #check if the script contains location data
         if "taught-by" in data:
             #get itemID
-            itemID = int(re.findall("(?:new Listview\(\{template:'item',id:'taught-by'.*?id:)(\d*)(?:\}\]\}\)\;)", data)[0])
+            itemID = int(re.findall(r"(?:new Listview\(\{template:'item',id:'taught-by'.*?id:)(\d*)(?:\}\]\}\)\;)", data)[0])
             petTaughtByItem[nID] = [pID,itemID]
             print("success <taught-by>: ",nID," - ",petTaughtByItem[nID])
             return True
@@ -2688,6 +2694,12 @@ for npcId, petId in testPets.items():
 with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:
     pickle.dump(petLocationData, df)
 
-#write pet npcID with missing location data to file
+#write pet npcID (key) with [petID and itemID] (value) to file
+# {npcID: [petID, itemID]}
+with open("Python Web Scraper\\petTaughtByItem.pkl", "wb") as df:
+    pickle.dump(petTaughtByItem, df)
+
+#write pet npcID with (missing location) and (not taught by item) data to file
+# [npcID]
 with open("Python Web Scraper\\petMissingLocation.pkl", "wb") as df:
     pickle.dump(petMissingLocation, df)
