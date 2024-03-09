@@ -6,8 +6,6 @@ import re
 import chompjs
 from numpy import base_repr
 
-useThreads = True
-
 #npcID: petID
 #npcID is used on the webpage
 #petID will be used by the addon
@@ -2536,99 +2534,6 @@ with open("Python Web Scraper\\petZones.pkl", "rb") as f:
 
 petIdd = len(petID)
 
-#smaller testing dict to ensure the script works
-testPets = {
-    7554: 69,
-    22943: 153,
-    7567: 78,
-    444: 1352,
-    2671: 39,
-    7380: 44,
-    7381: 45,
-    7382: 43,
-    7383: 42,
-    7384: 41,
-    7385: 40,
-    7386: 46,
-    7387: 50,
-    7389: 51,
-    7390: 47,
-    7391: 49,
-    7394: 52,
-    7395: 55,
-    7543: 56,
-    7544: 58,
-    7545: 59,
-    7546: 1563,
-    7547: 57,
-    7549: 65,
-    7550: 64,
-    7553: 68,
-    7555: 67,
-    7560: 72,
-    7561: 74,
-    7562: 77,
-    7565: 75,
-    8376: 83,
-    9656: 85,
-    9657: 86,
-    9662: 87,
-    10259: 89,
-    10598: 90,
-    11325: 92,
-    11326: 93,
-    11327: 94,
-    12419: 95,
-    14421: 70,
-    14755: 757,
-    14756: 758,
-    14878: 106,
-    15186: 107,
-    15358: 111,
-    15361: 1168,
-    15429: 114,
-    15698: 119,
-    15699: 116,
-    15705: 120,
-    15706: 118,
-    15710: 117,
-    16069: 121,
-    16085: 122,
-    16445: 1073,
-    16456: 124,
-    16547: 125,
-    16548: 126,
-    16549: 127,
-    16701: 128,
-    17254: 1927,
-    17255: 130,
-    18381: 131,
-    18839: 132,
-    20408: 136,
-    20472: 137,
-    21008: 140,
-    21009: 139,
-    21010: 138,
-    21018: 141,
-    21055: 142,
-    21056: 145,
-    21063: 144,
-    21064: 143,
-    21076: 146,
-    22445: 149,
-    23198: 155,
-    23231: 157,
-    23234: 156,
-    23258: 158,
-    23266: 159,
-    23274: 160,
-    23909: 162,
-    24388: 163,
-    24389: 164,
-    24480: 165,
-    24753: 166,
-    24968: 191,
-	}
 #the final dictionary with correct syntax
 petLocationData = {}
 
@@ -2647,7 +2552,7 @@ mapurl = "https://mop-shoot.tauri.hu/?npc="
 
 #attempt to extract pet coordinates
 #return success state
-def getPetLocationData(soup,pID):
+def getPetLocationData(soup,pID,printArray):
     
     #we expect the element to be at index 13
     #start at 12 for unexpected difference
@@ -2661,7 +2566,7 @@ def getPetLocationData(soup,pID):
             
             #check if there are no coordinates
             if re.search(r"var g_mapperData = {}",data):
-                print("fail <empty coords>")
+                printArray.append("fail <empty coords>")
                 return False
             
             #dict to store individual pet loc data
@@ -2705,15 +2610,16 @@ def getPetLocationData(soup,pID):
                     petLocationData[mapID][pID][layerID] = coordinatesData
 
             #we found the location data
-            print("success <location data>")
+            printArray.append("success <location data>")
             return True
     
     #we did not find the location data
+    printArray.append("no <location data>")
     return False
 
 #attempt to extract if pet can be taught by item
 #return success state
-def getLearnedByItem(soup,pID,nID):
+def getLearnedByItem(soup,pID,nID,printArray):
 
     #we expect the element to be at index 13 or 14
     #start at 12 for unexpected difference
@@ -2725,17 +2631,21 @@ def getLearnedByItem(soup,pID,nID):
             #get itemID
             itemID = int(re.findall(r"(?:new Listview\(\{template:'item',id:'taught-by'.*?id:)(\d*)(?:\}\]\}\)\;)", data)[0])
             petTaughtByItem[nID] = [pID,itemID]
-            print("success <taught-by>: ",nID," - ",petTaughtByItem[nID])
+            printArray.append("success <taught-by>: "+str(nID)+" - "+str(petTaughtByItem[nID]))
             return True
+    printArray.append("no <taught-by>")
     return False
 
 #fetch pet location data
 def handlePetData(nID, pID):
+    
+    printArray = []
 
     #counter to visualize progress in command line when executed
     global counterProg
     counterProg += 1
-    print(counterProg," / ",petIdd,"\t\t",nID,"-",pID)
+    
+    printArray.append(str(counterProg)+" / "+str(petIdd)+"\t\t"+str(nID)+"-"+str(pID))
 
     #if counterProg < 210:
     #    return
@@ -2746,34 +2656,34 @@ def handlePetData(nID, pID):
     soup = BeautifulSoup(requests.get(url).text, "html.parser").find_all("script")
 
     #attempt to extract pet coordinates, store success
-    petHasCoordinates = getPetLocationData(soup,pID)    
+    petHasCoordinates = getPetLocationData(soup,pID,printArray)    
     
     #check if pet can be learned by an item
-    petHasTaughtByItem = getLearnedByItem(soup,pID,nID)
+    petHasTaughtByItem = getLearnedByItem(soup,pID,nID,printArray)
 
     #if the pet has no location to catch and no item it can be learned by
     if not petHasCoordinates and not petHasTaughtByItem:
         petMissingLocation.append(nID)
-        print("pet data missing")
-    print("------------------------------------------------------")
+        printArray.append("pet data missing")
+    printArray.append("------------------------------------------------------")
 
-if useThreads:
+    for element in printArray:
+        print(element)
 
-    #create a thread for each npcID we want to scrape
-    for npcId, petId in testPets.items():
-    #for npcId, petId in petID.items():
-        t = threading.Thread(target=handlePetData,args=[npcId,petId])
-        t.start()
-        threads.append(t)
+#create a thread for each npcID we want to scrape
+#for npcId, petId in testPets.items():
+for npcId, petId in petID.items():
+    t = threading.Thread(target=handlePetData,args=[npcId,petId])
+    t.start()
+    threads.append(t)
 
-    #join all threads together
-    for thread in threads:
-        thread.join()
-else:
-
-    for npcId, petId in testPets.items():
-    #for npcId, petId in petID.items():
-        handlePetData(npcId,petId)
+#join all threads together
+for thread in threads:
+    thread.join()
+    
+#for npcId, petId in testPets.items():
+#for npcId, petId in petID.items():
+#    handlePetData(npcId,petId)
 
 #write entire pet location data dictionary to file
 with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:
