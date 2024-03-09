@@ -2532,21 +2532,24 @@ with open("Python Web Scraper\\petZones.pkl", "rb") as f:
     for zoneID, mapID in loaded_dict.items():
         petZones[zoneID] = mapID
 
-petZonesLen = len(petZones)
+petIdd = len(petID)
 
-""" #smaller testing dict to ensure the script works
+#smaller testing dict to ensure the script works
 testPets = {
-	62114: 466,
-	68555: 1129,
-	63550: 724,
-	62115: 467,
-	61367: 418,
-	61369: 420,
-	61751: 448
+    7554: 69,
+    22943: 153,
+    7567: 78,
+    444: 1352
 	}
- """
 #the final dictionary with correct syntax
-masterPetDataDict = {}
+petLocationData = {}
+
+#pets with items they can be taught by
+# { npcId: [petId, itemId] }
+petTaughtByItem = {}
+
+#pets with missing location data
+petMissingLocation = []
 
 threads = []
 counterProg = 0
@@ -2554,33 +2557,34 @@ counterProg = 0
 #npc id blank url
 mapurl = "https://mop-shoot.tauri.hu/?npc="
 
+#attempt to extract pet coordinates
+#return success state
+def getPetLocationData(soup,pID):
+    
+    #we expect the element to be at index 13
+    #start at 12 for unexpected difference
+    for elemnt in soup[12:]:
 
-#fetch pet location data
-def getPetLocationData(nID, pID):
-
-    #build the final npc id url
-    url = mapurl + str(nID)
-    #get webpage script data
-    soup = BeautifulSoup(requests.get(url).text, "html.parser").find_all("script")
-
-    #dict to store individual pet loc data
-    #zoneID:
-    #   layerID:
-    #       counts:
-    #       coords:
-    #           [
-    #               [coordinatepair]
-    #               [coordinatepair]
-    #           ]
-    petLocation = {}
-
-    #extracting the pet location data
-    for elemnt in soup:
+        #get the script text data
         data = elemnt.text
+
         #check if the script contains location data
         if "g_mapperData" in data:
+            
+            #dict to store individual pet loc data
+            #zoneID:
+            #   layerID:
+            #       counts:
+            #       coords:
+            #           [
+            #               [coordinatepair]
+            #               [coordinatepair]
+            #           ]
+            petLocation = {}
+
             #get raw location data
             data = re.findall("({.*?)(?:;)", data)[0]
+
             #add location data to dict
             petLocation = chompjs.parse_js_object(data)
 
@@ -2590,42 +2594,100 @@ def getPetLocationData(nID, pID):
                 mapID = petZones[int(zoneID)]
                 #check if the master dictionary already has an entry for the mapID
                 #if it does, we cannot assign an empty sub dictionary to the mapID key
-                if mapID in masterPetDataDict:
-                    masterPetDataDict[mapID][pID] = {}
+                if mapID in petLocationData:
+                    petLocationData[mapID][pID] = {}
                 else:
-                    masterPetDataDict[mapID] = { pID: {}}
+                    petLocationData[mapID] = { pID: {}}
+                print(": ",)
+                print(": ",)
                 #iterate all layers of the map/zone the pet is in
                 for layerID, layerData in zoneData.items():
+                    print(": ",)
                     #init an empty string for all the coordinates data
                     coordinatesData = ""
                     #iterate all coordinate arrays
-                    for coordinateArray in layerData["coords"]:
+                    for coordinateArray in layerData["coords"]:                        
+                        print(": ",)
                         #coordinates can be a float with up to 3 digits behind the comma
                         #we require a maximum of 1 digit behind the comma
                         #after *10 we trunc to remove unneeded info, then convert to int and turn the number into base 36
                         coordinatesData += base_repr(int(coordinateArray[0]*10),36) + base_repr(int(coordinateArray[1]*10),36)
                     #collected coordinate data gets saved to the specific layerID
-                    masterPetDataDict[mapID][pID][layerID] = coordinatesData
-            #counter to visualize progress in command line when executed
-            global counterProg
-            counterProg += 1
-            print(counterProg," / ",petZonesLen,"\t\t",nID,"-",pID)
-            #we break because we found the data on the website
-            #we are done with this url
-            break
+                    petLocationData[mapID][pID][layerID] = coordinatesData
+
+            #we found the location data
+            print("success <location data>")
+            return True
+    
+    #we did not find the location data
+    return False
+
+#attempt to extract if pet can be taught by item
+#return success state
+def getLearnedByItem(soup,pID,nID):
+
+    #we expect the element to be at index 13 or 14
+    #start at 12 for unexpected difference
+    for elemnt in soup[12:]:
+
+        data = elemnt.text
+        #check if the script contains location data
+        if "taught-by" in data:
+            #get itemID
+            itemID = int(re.findall("(?:new Listview\(\{template:'item',id:'taught-by'.*?id:)(\d*)(?:\}\]\}\)\;)", data)[0])
+            petTaughtByItem[nID] = [pID,itemID]
+            print("success <taught-by>: ",nID," - ",petTaughtByItem[nID])
+            return True
+    return False
+
+#fetch pet location data
+def handlePetData(nID, pID):
+
+    #counter to visualize progress in command line when executed
+    global counterProg
+    counterProg += 1
+    print(counterProg," / ",petIdd,"\t\t",nID,"-",pID)
+
+    #if counterProg < 210:
+    #    return
+
+    #build the final npc id url
+    url = mapurl + str(nID)
+    #get webpage script data
+    soup = BeautifulSoup(requests.get(url).text, "html.parser").find_all("script")
+
+    #attempt to extract pet coordinates, store success
+    petHasCoordinates = getPetLocationData(soup,pID)    
+    
+    #check if pet can be learned by an item
+    petHasTaughtByItem = getLearnedByItem(soup,pID,nID)
+
+    #if the pet has no location to catch and no item it can be learned by
+    if not petHasCoordinates and not petHasTaughtByItem:
+        petMissingLocation.append(nID)
+        print("pet data missing")
+    print("------------------------------------------------------")
 
 
-#create a thread for each npcID we want to scrape
-""" for npcId, petId in testPets.items(): """
-for npcId, petId in petID.items():
+""" #create a thread for each npcID we want to scrape
+for npcId, petId in testPets.items():
+#for npcId, petId in petID.items():
     t = threading.Thread(target=getPetLocationData,args=[npcId,petId])
     t.start()
     threads.append(t)
 
 #join all threads together
 for thread in threads:
-    thread.join()
+    thread.join() """
+
+for npcId, petId in testPets.items():
+#for npcId, petId in petID.items():
+    handlePetData(npcId,petId)
 
 #write entire pet location data dictionary to file
 with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:
-    pickle.dump(masterPetDataDict, df)
+    pickle.dump(petLocationData, df)
+
+#write pet npcID with missing location data to file
+with open("Python Web Scraper\\petMissingLocation.pkl", "wb") as df:
+    pickle.dump(petMissingLocation, df)
