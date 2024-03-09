@@ -2667,8 +2667,11 @@ def handlePetData(nID, pID):
         printArray.append("pet data missing")
     printArray.append("------------------------------------------------------")
 
+    printString = ""
+
     for element in printArray:
-        print(element)
+        printString += element+"\n"
+    print(printString)
 
 #create a thread for each npcID we want to scrape
 #for npcId, petId in testPets.items():
