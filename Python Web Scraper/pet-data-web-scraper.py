@@ -2527,7 +2527,7 @@ petID = {
 petZones = {}
 
 #load zoneID:mapID dictionary from file
-with open("Python Web Scraper\\petZones.pkl", "rb") as f:
+with open("petZones.pkl", "rb") as f:
     loaded_dict = pickle.load(f)
     for zoneID, mapID in loaded_dict.items():
         petZones[zoneID] = mapID
@@ -2689,15 +2689,16 @@ for thread in threads:
 #    handlePetData(npcId,petId)
 
 #write entire pet location data dictionary to file
-with open("Python Web Scraper\\petLocationData.pkl", "wb") as df:
+with open("petLocationData.pkl", "wb") as df:
     pickle.dump(petLocationData, df)
 
 #write pet npcID (key) with [petID and itemID] (value) to file
 # {npcID: [petID, itemID]}
-with open("Python Web Scraper\\petTaughtByItem.pkl", "wb") as df:
+with open("petTaughtByItem.pkl", "wb") as df:
     pickle.dump(petTaughtByItem, df)
 
 #write pet npcID with (missing location) and (not taught by item) data to file
 # [npcID]
-with open("Python Web Scraper\\petMissingLocation.pkl", "wb") as df:
+with open("petMissingLocation.pkl", "wb") as df:
     pickle.dump(petMissingLocation, df)
+
