@@ -2,3 +2,7 @@
 testing.lua
 testing
 Firefox extension/battle-pet-temp.js
+Python Web Scraper/petLocationData.pkl
+Python Web Scraper/petMissingLocation.pkl
+Python Web Scraper/petTaughtByItem.pkl
+Python Web Scraper/PetAddonData.lua
